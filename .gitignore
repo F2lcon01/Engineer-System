@@ -1,0 +1,46 @@
+# ============================================================
+# Engineer System - .gitignore
+# ============================================================
+
+# Session tracking (internal to runtime)
+.claude/.session-edits.log
+
+# Backup folders created by setup script
+.backup-*/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PowerShell transcripts
+PowerShell_transcript.*.txt
+
+# Python (if anyone adds Python tooling later)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Node (if anyone adds Node tooling later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary
+*.tmp
+*.bak
+*.log
+
+# Distribution artifacts (the ZIP is generated, not source)
+# Comment this out if you want to ship the ZIP in the repo
+# Engineer-System-Complete.zip

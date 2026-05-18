@@ -1,0 +1,17 @@
+# Keep shell scripts as LF — bash on macOS/Linux breaks on CRLF
+*.sh           text eol=lf
+*.bash         text eol=lf
+
+# PowerShell scripts: CRLF on Windows
+*.ps1          text eol=crlf
+*.psm1         text eol=crlf
+*.psd1         text eol=crlf
+
+# Markdown, JSON, configs: normalize to LF in repo
+*.md           text eol=lf
+*.json         text eol=lf
+*.yml          text eol=lf
+*.yaml         text eol=lf
+.gitignore     text eol=lf
+.gitattributes text eol=lf
+LICENSE        text eol=lf
