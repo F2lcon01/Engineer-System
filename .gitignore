@@ -5,6 +5,9 @@
 # Session tracking (internal to runtime)
 .claude/.session-edits.log
 
+# Local-only README design skill (Polar design system reference — not part of public repo)
+skilllsrREADME/
+
 # Backup folders created by setup script
 .backup-*/
 
