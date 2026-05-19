@@ -81,6 +81,9 @@ Skills ملفات `.md` في `.claude/skills/` تُقرأ على الطلب من
 
 - `windows-registry` → عند تعديل Registry
 - `pester-testing` → عند كتابة Pester tests
+- `nodejs-testing` → عند كتابة vitest/jest/node:test
+- `python-testing` → عند كتابة pytest
+- `git-conventions` → عند كتابة commit messages أو فروع
 - `github-research` → عند البحث عن مشاريع مشابهة على GitHub
 
 ---
@@ -92,6 +95,7 @@ Skills ملفات `.md` في `.claude/skills/` تُقرأ على الطلب من
 - `/scout [domain]` — مسح صريح لـ GitHub عن مشاريع مشابهة
 - `/review [target]` — مراجعة كود صارمة
 - `/session-end` — تحديث PROJECT_MAP + Score/50
+- `/update` — سحب آخر إصدار من GitHub + ترقية المشروع الحالي
 
 ---
 

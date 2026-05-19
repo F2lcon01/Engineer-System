@@ -485,6 +485,52 @@ timeline
 
 ---
 
+## 🚀 إصدار نسخة جديدة — Releasing (للمساهمين)
+
+عند الإفراج عن `vX.Y.Z` جديدة:
+
+### 1. حدّث ملفات الإصدار
+
+- `README.md` → badge Version
+- `CHANGELOG.md` → قسم جديد على رأس الملف (Keep-a-Changelog format)
+- `CLAUDE.md` → عنوان `# Principal Engineer — vX.Y.Z`
+
+### 2. Commit + tag + push
+
+```powershell
+git add -A
+git commit -m "Release vX.Y.Z: <one-line summary>"
+git tag -a vX.Y.Z -m "Engineer System vX.Y.Z — <theme>"
+git push origin main
+git push origin vX.Y.Z
+```
+
+### 3. أنشئ GitHub Release (يربط الـ tag بصفحة Releases الرسمية)
+
+**خيار A — عبر `gh` CLI (موصى به):**
+
+```powershell
+gh release create vX.Y.Z --notes-from-tag --title "vX.Y.Z — <theme>"
+```
+
+**خيار B — عبر الواجهة:**
+
+1. اذهب لـ `https://github.com/F2lcon01/Engineer-System/releases/new`
+2. اختر الـ tag الجديد
+3. الصق ملخص `CHANGELOG.md` للنسخة
+4. Publish
+
+### 4. اختبار سريع بعد الإطلاق
+
+```powershell
+cd C:\temp
+git clone https://github.com/F2lcon01/Engineer-System.git test-release
+cd test-release
+node .claude/hooks/__smoke-test.mjs   # يجب أن يعطي 10/10
+```
+
+---
+
 ## 🤝 المساهمة — Contributing
 
 Pull requests مرحَّب بها. قبل فتح PR:

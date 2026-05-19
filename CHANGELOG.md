@@ -5,6 +5,31 @@ All notable changes to Engineer System.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-05-19
+
+### Added
+
+- **`/update` slash command** — pulls latest source from GitHub and re-runs `install-eng -Mode Upgrade` on the current project. One command instead of four.
+- **3 new skills:**
+  - `nodejs-testing` — vitest/jest/node:test patterns with mocking, async, fake timers
+  - `python-testing` — pytest fixtures, parametrize, monkeypatch, async with pytest-asyncio
+  - `git-conventions` — Conventional Commits detection + branch naming + footer rules
+- **Releases workflow documentation** in `README.md` (commit → tag → `gh release create`)
+- **`test/SampleModule/`** — a real PowerShell module fixture used to e2e-test `install-eng` (Install/Upgrade/DryRun) + the validator running real Pester
+- **`test/TEST_RESULTS.md`** — 10-scenario test matrix with evidence
+
+### Fixed
+
+- **Installer Bug #1:** DryRun mode emitted a false-positive `مجلد hooks غير موجود` warning because `Test-HooksInstalled` ran before any files were written. Now short-circuits when `$script:DryRun -eq $true`.
+
+### Verified (end-to-end testing)
+
+- ✅ `install-eng` Install/Upgrade/DryRun on a real PowerShell module
+- ✅ `CLAUDE.local.md` and `.claude/project.json` protected on Upgrade
+- ✅ `validator` reads `project.json` and runs real Pester (5/5 tests pass)
+- ✅ Both `CLAUDE.md` and `CLAUDE.local.md` auto-injected into Claude Code's context
+- ✅ pre-bash hook blocks the 5 dangerous patterns (incl. new v3.2 docker/kubectl) and allows the 5 benign ones
+
 ## [3.3.0] - 2026-05-19
 
 ### ⚠️ BREAKING

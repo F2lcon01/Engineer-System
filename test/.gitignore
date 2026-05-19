@@ -1,0 +1,8 @@
+# test/ holds fixtures. The installed Engineer System inside any fixture
+# is regenerated on demand via install-eng — never commit it.
+
+SampleModule/CLAUDE.md
+SampleModule/CLAUDE.local.md
+SampleModule/.claude/
+SampleModule/memory/
+SampleModule/.gitignore

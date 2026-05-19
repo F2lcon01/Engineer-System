@@ -290,6 +290,11 @@ function Install-Files {
 function Test-HooksInstalled {
     Write-Step "التحقق من ملفات الـ Hooks (Node)..."
 
+    if ($script:DryRun) {
+        Write-Info "(DryRun) تخطي فحص hooks — لم يُكتب شيء فعلياً"
+        return
+    }
+
     $hooksDir = Join-Path $TargetPath '.claude\hooks'
     if (-not (Test-Path $hooksDir)) {
         Write-Warn "مجلد hooks غير موجود — تخطي"
