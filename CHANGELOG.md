@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Installer Bug #1:** DryRun mode emitted a false-positive `مجلد hooks غير موجود` warning because `Test-HooksInstalled` ran before any files were written. Now short-circuits when `$script:DryRun -eq $true`.
+- **pre-bash Bug #2:** SQL data-loss patterns matched any substring (so a git commit message mentioning `DROP DATABASE` was blocked). Now requires a DB-client context (`psql`/`mysql`/`sqlite3`/`mongo`/`cqlsh`) on the same command line. Regression test added to `__smoke-test.mjs` (now 11/11 instead of 10/10).
 
 ### Verified (end-to-end testing)
 

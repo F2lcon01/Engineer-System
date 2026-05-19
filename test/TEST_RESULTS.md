@@ -27,6 +27,14 @@
 - **Fix:** Short-circuit at start of `Test-HooksInstalled` when `$script:DryRun -eq $true`
 - **Status:** ✅ Fixed in `installer/Install-EngineerSystem.ps1` — DryRun now prints `(DryRun) تخطي فحص hooks — لم يُكتب شيء فعلياً`
 
+### Bug #2 — pre-bash false-positive on commit messages containing SQL keywords
+
+- **Symptom:** `git commit -m "fix: handle DROP DATABASE on shutdown"` was BLOCKED by pre-bash hook
+- **Cause:** SQL patterns matched any substring; a commit message mentioning the word triggered the block
+- **Fix:** SQL patterns now require a DB-client context on the same command line (`psql`, `mysql`, `sqlite3`, `mongo`, `cqlsh`, etc.). Pure substring matches no longer trigger.
+- **Status:** ✅ Fixed in `.claude/hooks/pre-bash.mjs`. Regression test added to `__smoke-test.mjs` — now 11/11 PASS.
+- **Discovered when:** Trying to commit v3.3.1 with this very release notes file — eating our own dog food.
+
 ## Notes
 
 - No edge case revealed a fundamental architectural issue.

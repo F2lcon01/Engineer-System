@@ -62,9 +62,10 @@ const PATTERNS = [
     { pattern: /\bgit\s+(branch|tag)\s+-D\s+(main|master|release\/)/, label: 'force-delete protected branch/tag', mode: 'literal' },
     { pattern: /\bgit\s+clean\s+-[a-z]*[fx][a-z]*d?\s+\//, label: 'git clean at root', mode: 'literal' },
 
-    // SQL nukes (case-insensitive)
-    { pattern: /\bdrop\s+(database|schema|table)\b/, label: 'SQL DROP', mode: 'ci' },
-    { pattern: /\btruncate\s+table\b/, label: 'SQL TRUNCATE TABLE', mode: 'ci' },
+    // SQL data-loss commands (case-insensitive) — only when invoked through a DB client,
+    // so commit messages or scripts mentioning the words won't false-positive.
+    { pattern: /\b(psql|mysql|mariadb|mysqldump|sqlite3?|sqlcmd|mongo|cqlsh)\b.*\bdrop\s+(database|schema|table)\b/, label: 'SQL DROP via DB client', mode: 'ci' },
+    { pattern: /\b(psql|mysql|mariadb|mysqldump|sqlite3?|sqlcmd|mongo|cqlsh)\b.*\btruncate\s+table\b/, label: 'SQL TRUNCATE via DB client', mode: 'ci' },
 
     // Container/k8s destructive
     { pattern: /\bdocker\s+system\s+prune\s+(--all|-a)\b/, label: 'docker system prune -a', mode: 'literal' },
