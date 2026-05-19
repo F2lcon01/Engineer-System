@@ -1,123 +1,94 @@
-# دليل التثبيت السريع
+# دليل التثبيت السريع (Windows + Claude Code for VS Code)
 
 ## الفكرة
 
-ضع مجلد النظام مرة واحدة على سطح المكتب، ثم ثبّته في أي مشروع بأمر واحد.
+ضع مجلد النظام مرة واحدة على سطح المكتب، ثم ثبّته في أي مشروع بأمر PowerShell واحد. النظام يعمل تلقائياً داخل **Claude Code for VS Code** (الـ extension يقرأ نفس `.claude/settings.json`).
 
 ---
 
 ## الإعداد لمرة واحدة
 
 ```powershell
-# 1. انسخ مجلد النظام لسطح المكتب
-# اجعل المسار: C:\Users\<اسمك>\Desktop\Engineer System
+# 1. ضع مجلد النظام في:
+#    C:\Users\<اسمك>\Desktop\Engineer System
 #
 # هيكل المجلد:
-# Engineer System/
+# Engineer System\
 # ├── CLAUDE.md
-# ├── .claude/
-# │   ├── agents/
-# │   ├── commands/
-# │   ├── hooks/
+# ├── .claude\
+# │   ├── agents\          (7 ملفات .md)
+# │   ├── commands\        (3 ملفات .md)
+# │   ├── hooks\           (4 ملفات .mjs — Node)
+# │   ├── skills\          (2 ملفات .md)
 # │   └── settings.json
-# ├── memory/
+# ├── memory\
 # │   └── PROJECT_MAP.md
-# └── installer/
+# └── installer\
 #     ├── Install-EngineerSystem.ps1
-#     ├── install.sh
 #     └── INSTALL-PROMPT.md
 ```
+
+### المتطلبات
+
+- **Windows 10/11**
+- **PowerShell 5.1+** (موجود افتراضياً)
+- **Node.js 18+** — إلزامي للـ hooks (`node --version` للفحص)
+- **Claude Code for VS Code** extension
 
 ---
 
 ## الاستخدام
 
-### الطريقة 1: PowerShell (Windows — موصى به)
+### الطريقة 1: PowerShell (موصى بها)
 
 ```powershell
 # انتقل لمشروعك
 cd C:\projects\my-project
 
-# شغّل المثبّت
+# شغّل المثبّت مباشرة
 & "$env:USERPROFILE\Desktop\Engineer System\installer\Install-EngineerSystem.ps1"
 ```
 
-**اختصار أفضل — أضفه لـ PowerShell profile:**
+**اختصار `install-eng` — أضفه لـ PowerShell profile مرة واحدة:**
 
 ```powershell
-# افتح profile
+# 1. افتح الـ profile
 notepad $PROFILE
 
-# أضف هذا السطر
+# 2. ألصق هذا السطر:
 function install-eng {
     & "$env:USERPROFILE\Desktop\Engineer System\installer\Install-EngineerSystem.ps1" @args
 }
 
-# احفظ ثم أعد فتح PowerShell
-# الآن استخدمه في أي مشروع:
+# 3. احفظ، ثم أعد تحميل:
+. $PROFILE
+
+# 4. الآن من أي مشروع:
 cd C:\projects\polar-os
 install-eng
 ```
 
-### الطريقة 2: Bash (Linux/macOS/WSL)
+### الطريقة 2: Claude نفسه (من داخل VS Code، بدون terminal)
 
-```bash
-# انتقل لمشروعك
-cd ~/projects/my-project
-
-# شغّل المثبّت
-bash ~/Desktop/Engineer\ System/installer/install.sh
-
-# اختصار — أضفه لـ ~/.bashrc أو ~/.zshrc
-alias install-eng='bash ~/Desktop/Engineer\ System/installer/install.sh'
-```
-
-### الطريقة 3: Claude نفسه (بدون terminal)
-
-افتح Claude Code في أي مشروع واكتب:
+افتح VS Code → فعّل Claude Code → اكتب:
 
 ```
 ثبّت Engineer System من ~/Desktop/Engineer System في هذا المشروع.
 احفظ بياناتي الموجودة. اعرض الخطة قبل التنفيذ.
 ```
 
-Claude سيقرأ الملفات، يفحص الـ conflicts، ويثبّت بذكاء.
+Claude يقرأ، يفحص الـ conflicts، ينسخ، ويُخصِّص.
 
 ---
 
 ## الأوضاع المتاحة
 
-### Install (افتراضي) — تثبيت جديد
-
-```powershell
-install-eng
-```
-
-يفشل إذا النظام مثبّت سابقاً (حماية من الكتابة فوق التخصيصات).
-
-### Upgrade — ترقية مع الحفاظ على البيانات
-
-```powershell
-install-eng -Mode Upgrade
-```
-
-يحدّث agents/commands/hooks، **يحمي** CLAUDE.md و PROJECT_MAP.md الموجودين.
-
-### DryRun — معاينة بدون تنفيذ
-
-```powershell
-install-eng -Mode DryRun
-```
-
-يعرض ما سيحدث بدون كتابة أي ملف. مفيد للفحص قبل التنفيذ.
-
-### Force — استبدال كامل (خطر)
-
-```powershell
-install-eng -Force
-```
-
-يكتب فوق كل شيء. **يفقد التخصيصات والبيانات.** استخدمه فقط إذا تعرف ماذا تفعل.
+| الوضع | الأمر | الغرض |
+|-------|------|-------|
+| **Install** | `install-eng` | تثبيت جديد (يفشل لو موجود) |
+| **Upgrade** | `install-eng -Mode Upgrade` | يحدّث agents/hooks، يحمي CLAUDE.md و PROJECT_MAP |
+| **DryRun** | `install-eng -Mode DryRun` | معاينة بدون كتابة |
+| **Force** | `install-eng -Force` | استبدال كامل (خطر — يفقد التخصيصات) |
 
 ---
 
@@ -133,12 +104,12 @@ install-eng
 
 # الناتج:
 # ✓ ملفات جديدة: 14
-# ✓ Hooks مُفعّلة
+# ✓ كل الـ hooks (.mjs) موجودة — لا تحتاج chmod (Node executor)
 # ✓ .gitignore محدّث
-# اكتمل التثبيت بنجاح
+# ✓ اكتمل التثبيت بنجاح
 ```
 
-### بعد شهر: ترقية النظام
+### بعد شهر: ترقية النظام لعدة مشاريع
 
 ```powershell
 # عدّلت staff-engineer.md في النسخة الأصلية
@@ -148,15 +119,13 @@ cd C:\projects\polar-os
 install-eng -Mode Upgrade
 # CLAUDE.md (محتوي تخصيصاتك): محمي
 # PROJECT_MAP.md (محتوي 30 جلسة): محمي
-# agents/staff-engineer.md: مُحدّث
+# agents\staff-engineer.md: مُحدّث
 
 cd C:\projects\everything-claude-code
 install-eng -Mode Upgrade
-# نفس الشيء
 
 cd C:\projects\new-tool
 install-eng -Mode Upgrade
-# نفس الشيء
 ```
 
 ثلاث مشاريع، ثلاث ثوانٍ.
@@ -167,7 +136,6 @@ install-eng -Mode Upgrade
 
 ### "مجلد المصدر غير موجود"
 
-تأكد من المسار:
 ```powershell
 # المسار الافتراضي:
 "$env:USERPROFILE\Desktop\Engineer System"
@@ -179,22 +147,33 @@ install-eng -SourcePath "D:\Tools\Engineer System"
 ### "النظام مثبّت سابقاً"
 
 استخدم Upgrade بدل Install:
+
 ```powershell
 install-eng -Mode Upgrade
 ```
 
-### Hooks لا تعمل على Windows
+### Hooks لا تعمل
 
-PowerShell ينفذ chmod عبر WSL/Git Bash. تأكد من تثبيت أحدهما، أو شغّل يدوياً في WSL:
-```bash
-cd /mnt/c/projects/my-project
-chmod +x .claude/hooks/*.sh
+```powershell
+# تحقق من Node:
+node --version
+# يجب أن يكون v18+
+
+# لو ناقص: ثبّت من https://nodejs.org/ (LTS)
 ```
 
 ### "Claude Code CLI غير مثبّت"
 
-```bash
+```powershell
 npm install -g @anthropic-ai/claude-code
+```
+
+### اختبار الـ hooks بعد التثبيت
+
+```powershell
+# لو مجلد المصدر يحوي smoke test:
+node "$env:USERPROFILE\Desktop\Engineer System\.claude\hooks\__smoke-test.mjs"
+# المتوقع: 10 passed, 0 failed
 ```
 
 ---
@@ -202,6 +181,7 @@ npm install -g @anthropic-ai/claude-code
 ## ملاحظات
 
 - النظام **لا يحذف** ملفات المشروع — يضيف فقط ملفاته الخاصة
-- في Upgrade: CLAUDE.md و PROJECT_MAP.md المحتويين بياناتك محميان دائماً
-- DryRun هو صديقك — استخدمه قبل أي عملية مشكوك فيها
-- النظام آمن للـ git — يضيف للـ .gitignore تلقائياً
+- في Upgrade: `CLAUDE.md` و `PROJECT_MAP.md` المحتويين بياناتك **محميان دائماً**
+- `DryRun` هو صديقك — استخدمه قبل أي عملية مشكوك فيها
+- النظام آمن للـ git — يضيف للـ `.gitignore` تلقائياً
+- الـ hooks مكتوبة بـ Node.js (لا bash، لا WSL، لا chmod)

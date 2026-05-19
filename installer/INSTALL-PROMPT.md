@@ -31,7 +31,7 @@
 | CLAUDE.md | جديد/موجود | إنشاء/تحديث/دمج |
 | .claude/agents/*.md | جديد/موجود | إنشاء/استبدال |
 | .claude/commands/*.md | جديد/موجود | إنشاء/استبدال |
-| .claude/hooks/*.sh | جديد/موجود | إنشاء/استبدال + chmod +x |
+| .claude/hooks/*.mjs | جديد/موجود | إنشاء/استبدال (Node — لا chmod) |
 | .claude/settings.json | جديد/موجود | إنشاء/استبدال |
 | memory/PROJECT_MAP.md | جديد/له بيانات | إنشاء/حماية |
 
@@ -39,7 +39,8 @@
 
 ### 4. التنفيذ بعد التأكيد
 - انسخ الملفات حسب الخطة
-- شغّل: chmod +x .claude/hooks/*.sh
+- الـ hooks مكتوبة بـ Node (.mjs) — لا تحتاج chmod
+- تحقق من Node 18+: `node --version`
 - إذا الـ project git repo:
   - تحقق من .gitignore
   - أضف السطرين التاليين إذا غير موجودين:
@@ -57,8 +58,8 @@
 
 ### 6. التحقق النهائي
 - تأكد أن كل الملفات منسوخة (اعرضها بـ tree أو find)
-- تأكد أن hooks لديها صلاحيات تنفيذ
-- اقترح خطوة تالية: "أعد فتح Claude Code أو اكتب /agents للتحقق"
+- تأكد أن hooks موجودة (4 ملفات .mjs في .claude/hooks/)
+- اقترح خطوة تالية: "أعد فتح Claude Code for VS Code أو اكتب /agents للتحقق"
 
 ## القيود
 - لا تحذف أي ملف موجود قبل سؤالي
@@ -77,7 +78,7 @@
 ثبّت Engineer System من ~/Desktop/Engineer System في هذا المشروع.
 احفظ بياناتي الموجودة (CLAUDE.md، PROJECT_MAP.md إذا موجودة).
 اعرض الخطة قبل التنفيذ، انتظر موافقتي، ثم نفّذ.
-في النهاية: chmod +x للـ hooks، وحدّث .gitignore إذا git repo.
+في النهاية: تحقق من Node 18+، وحدّث .gitignore إذا git repo.
 ```
 
 ---

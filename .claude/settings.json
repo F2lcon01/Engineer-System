@@ -4,10 +4,7 @@
     "SessionStart": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/session-start.sh"
-          }
+          { "type": "command", "command": "node .claude/hooks/session-start.mjs" }
         ]
       }
     ],
@@ -15,10 +12,7 @@
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/post-edit.sh"
-          }
+          { "type": "command", "command": "node .claude/hooks/post-edit.mjs" }
         ]
       }
     ],
@@ -26,20 +20,14 @@
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/pre-bash.sh"
-          }
+          { "type": "command", "command": "node .claude/hooks/pre-bash.mjs" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/stop-reminder.sh"
-          }
+          { "type": "command", "command": "node .claude/hooks/stop-reminder.mjs" }
         ]
       }
     ]

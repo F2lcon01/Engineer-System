@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Code review specialist that verifies contracts (pre/post conditions) and success criteria. Use PROACTIVELY after any subagent completes implementation, BEFORE accepting the result. Triggers on "review this code", "verify the implementation", "check if criterion met", or automatically by Principal after subagent delivers. Returns pass/fail with evidence from file:line.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: sonnet
 ---
 

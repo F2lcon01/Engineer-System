@@ -1,5 +1,5 @@
 ---
-description: Analyze task, propose subagent, and trigger plan-reviewer gate for M/L tasks
+description: Analyze task, propose subagent, and trigger plan-reviewer gate for M/L tasks (v3.2 three-gate workflow)
 argument-hint: <task description>
 ---
 
@@ -14,9 +14,9 @@ Operating as Principal Engineer. Task: **$ARGUMENTS**
 | Size | Definition | Decision |
 |------|------------|----------|
 | XS | Single question / trivial edit | Answer directly, no subagent, no review |
-| S | Single scope, 1-2 files | One subagent + optional code-reviewer |
-| M | 2+ scopes or dependencies | **plan-reviewer required** + executor + code-reviewer |
-| L | Multi-component | **plan-reviewer required** + multiple executors + code-reviewer per stage |
+| S | Single scope, 1-2 files | One subagent + optional code-reviewer + validator (if criterion executable) |
+| M | 2+ scopes or dependencies | **plan-reviewer required** + executor + code-reviewer + **validator** |
+| L | Multi-component | **plan-reviewer required** + multiple executors + code-reviewer per stage + **validator at end** |
 
 ### Step 2 — Subagent selection
 
@@ -86,3 +86,12 @@ The plan-reviewer will return:
 Even after plan-reviewer approval, **wait for the user** to say "proceed" or equivalent before invoking executors.
 
 This prevents runaway agent loops on misunderstood tasks.
+
+### Step 8 — Post-execution: validator gate (v3.2)
+
+After the executor delivers and **code-reviewer** approves the contract:
+
+- If the success criterion is **executable** (Pester / npm test / pytest / build command), **immediately** invoke `validator` via Task tool.
+- Pass it the exact command and the criterion. The validator returns PASS (exit 0 + transcript) or FAIL.
+- **Do not declare success without validator PASS** when the criterion is executable.
+- If the criterion is **non-executable** (documentation, design notes), state that explicitly in the final report — do not silently skip the gate.

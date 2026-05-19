@@ -1,11 +1,22 @@
 # PROJECT_MAP.md
 <!-- Persistent project memory — injected at session start via SessionStart hook -->
-<!-- Updated at session end via /session-end command -->
+<!-- Auto-populated by /bootstrap on first session, updated by /session-end thereafter -->
+
+---
+
+## [PROJECT_IDENTITY]
+<!-- Filled by /bootstrap: name, purpose, primary stack, entry points -->
+
+- **Name:**
+- **Purpose:**
+- **Primary stack:**
+- **Entry point(s):**
+- **GitHub similar projects (top 3):**
 
 ---
 
 ## [TECH_STACK]
-<!-- Tools and versions — never list a version without verifying it on the web -->
+<!-- Tools and versions — never list a version without verifying -->
 
 | Tool | Version | Verified date | Notes |
 |------|---------|---------------|-------|
@@ -25,8 +36,8 @@
 ## [SYSTEM_FLOW]
 <!-- User journey or data flow — as verifiable goals -->
 
-```
-[Write the system flow here once project is understood]
+```text
+[Filled by /bootstrap or first /session-end]
 ```
 
 ---
@@ -34,14 +45,14 @@
 ## [PENDING]
 <!-- Open tasks — moved to DONE when completed -->
 
-- [ ] 
+- [ ]
 
 ---
 
 ## [DONE]
 <!-- Completed tasks — kept as record -->
 
-- [x] 
+- [x]
 
 ---
 
@@ -57,28 +68,10 @@
 - **Outcome:**
   - Completed: [list]
   - Blocked: [list with reason]
-- **Metrics:**
-  - Score: X/50
-  - Plan-adherence: X/10
-  - Cost: N calls, ~T tokens, ~$X
 - **Files modified:** [list]
 - **Lessons:** [what would you do differently?]
 
 -->
-
----
-
-## [COST_LEDGER]
-<!-- Track value over time — appended by /session-end -->
-
-| Session | Date | Score | Adherence | Tokens | Cost $ | $/point |
-|---------|------|-------|-----------|--------|--------|---------|
-| | | | | | | |
-
-**Insight column: $/point**
-- Best value sessions have LOW $/point (high score, low cost)
-- Worst value sessions have HIGH $/point (high cost, low score)
-- Use this to identify which workflows actually pay off
 
 ---
 

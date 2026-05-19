@@ -5,6 +5,77 @@ All notable changes to Engineer System.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-05-19
+
+### ⚠️ BREAKING
+
+- **`CLAUDE.md` split into `CLAUDE.md` (immutable system) + `CLAUDE.local.md` (per-project, gitignored).** On upgrade, `CLAUDE.md` is now always refreshed (no more "is this customization or system?" ambiguity). Move your project-specific notes from old `CLAUDE.md` into `CLAUDE.local.md` after upgrade.
+- **COST_LEDGER and Plan-Adherence /10 removed from `/session-end` and `PROJECT_MAP.md`.** They were aspirational metrics that depended on data Claude Code does not expose reliably. `/session-end` now records a single honest Score /50. Existing `[COST_LEDGER]` entries in your PROJECT_MAP can stay as historical record — the template no longer creates the section.
+
+### Added
+
+- **`/bootstrap` slash command** — first-session full project scan. Reads source, manifests, README, git history. Then invokes `staff-engineer` to scout GitHub for 3-5 similar projects. Writes `.claude/project.json`, fills `memory/PROJECT_MAP.md` sections (`[PROJECT_IDENTITY]`, `[TECH_STACK]`, `[ARCHITECTURE]`, `[SYSTEM_FLOW]`), and seeds `CLAUDE.local.md`. This is the "one-command → smart" promise made real.
+- **`/scout [domain]` slash command** — on-demand GitHub reconnaissance. Returns 5 verified production-quality projects with stars, last commit, language, takeaway, and risk. Uses `github-research` skill for methodology.
+- **`github-research` skill** — methodology for scouting GitHub: search patterns, quality filters (12-month freshness, license check, bus-factor signals), citation discipline (WebFetch each repo, never trust search snippets). Loaded by `staff-engineer` and the `/scout` command.
+- **`.claude/project.json`** — machine-readable project metadata (language, framework, test/lint/build commands, entry points). Written by `/bootstrap`, **read by `validator`** so it stops guessing commands.
+- **`CLAUDE.local.md`** — per-project notes file. Always protected on upgrade, gitignored by default, auto-read by Claude Code alongside `CLAUDE.md`.
+- **`memory/PROJECT_MAP.md` new section `[PROJECT_IDENTITY]`** — replaces the manual-fill awkwardness of v3.2.
+
+### Changed
+
+- `validator` agent now reads `.claude/project.json` first; falls back to manifest detection only if commands are absent. Refuses to invent a command.
+- `staff-engineer` agent points to `github-research` skill for GitHub scouting tasks (no more improvised searches).
+- Installer:
+  - `CLAUDE.md` is now always overwritten on upgrade (it's pure system).
+  - `CLAUDE.local.md` is protected if exists, seeded from source template if missing.
+  - `.claude/project.json` is protected if it has user data.
+  - `.session-edits.log` and its rotated `.old` variant are never copied.
+  - `.gitignore` updated to add `CLAUDE.local.md` and `.claude/.session-edits.log.old`.
+  - Post-install hint replaced — now suggests `/bootstrap` as the first step instead of "edit CLAUDE.md context section."
+- `/session-end` simplified: one Score /50, no fake adherence/cost metrics.
+
+### Removed
+
+- `[COST_LEDGER]` section from `memory/PROJECT_MAP.md` template (it's gone for new installs; existing PROJECT_MAPs keep their data).
+- Plan-Adherence /10 metric (was subjective, low signal).
+- "Cost-of-Pass" $/point insight (Claude Code lacks reliable per-session token reporting).
+
+## [3.2.0] - 2026-05-19
+
+### ⚠️ BREAKING
+
+- **Project scope narrowed to Windows + Claude Code for VS Code extension.** Linux/macOS sections removed from README, `installer/install.sh` is now deprecated (deletion candidate for v3.3).
+- **Hooks migrated from bash (`.sh`) to Node.js (`.mjs`)**. Old `.claude/hooks/*.sh` files are no longer referenced. Delete them after upgrade.
+- **`node` (v18+) is now a hard runtime requirement** for hooks. It was already required by Claude Code itself, so this should affect no one in practice.
+- **`code-reviewer` lost the `Bash` tool** — it is strictly read-only now. Execution of tests/lint moved to the new `validator` agent.
+- **`plan-reviewer` model changed from `opus` to `sonnet`** by default. Override in the frontmatter if you handle architecture-critical reviews and want Opus.
+
+### Added
+
+- `validator` subagent (Haiku) — runs the actual command that proves the success criterion (Pester / npm / pytest / build), captures exit code + transcript, returns PASS/FAIL. Distinct from code-reviewer (inspector).
+- Node hooks: `session-start.mjs`, `pre-bash.mjs`, `post-edit.mjs`, `stop-reminder.mjs`.
+- `.gitattributes` extended to cover `.mjs/.js/.cjs` with LF.
+- Installer (PS1 + Bash) now probes Node.js version and warns if `< 18` or missing.
+- Installer warns when legacy `.sh` hooks are detected and shows the exact remove command.
+- `pre-bash.mjs` expanded pattern catalog: now blocks ~20 destructive families including `rm --no-preserve-root`, `chown -R … /`, `git reset --hard HEAD~`, force-delete of protected branches, `git clean` at root, `TRUNCATE TABLE`, `docker system prune -a`, `kubectl delete ns/all`, and `curl|wget piped into a shell`.
+
+### Fixed
+
+- **Security: pre-bash bypass via shell escaping.** v3.1 extracted `$.tool_input.command` via `grep` on the raw JSON, which broke on escaped quotes and allowed nested commands to slip past the pattern list. v3.2 uses `JSON.parse` on stdin.
+- **Compatibility: Windows + WSL hook hang.** v3.1 `.sh` hooks resolved `bash` to `C:\Windows\System32\bash.exe` (WSL stub) on Windows machines that had WSL installed (common with Docker Desktop), which froze the TUI. v3.2 has no bash dependency.
+- **Stability: log unbounded growth.** `post-edit` now rotates `.session-edits.log` at 256 KB to `.session-edits.log.old`.
+- **Hygiene: Stop-hook count is meaningful.** Reminder now reports unique edited files, not raw event lines.
+
+### Changed
+
+- README: removed fabricated session metrics (`Score 47/50 | $/pt $0.0012` were illustrative not measured — relabeled explicitly).
+- README: comparison table updated with verified competitor file/agent counts (wshobson ~185, VoltAgent ~131).
+- Roadmap: validator moved from v3.2 (promised) to v3.2 (delivered).
+
+### Removed (deprecated)
+
+- `.claude/hooks/*.sh` — no longer invoked by `settings.json`. Will be deleted in v3.3.
+
 ## [3.1.0] - 2026-05-18
 
 ### Added

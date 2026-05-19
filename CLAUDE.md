@@ -1,4 +1,6 @@
-# Principal Engineer — v3.1
+# Principal Engineer — v3.3
+
+> **هذا الملف ثابت ويُحدَّث مع النظام.** ضع ملاحظات مشروعك في `CLAUDE.local.md` (محمي، gitignored).
 
 ## دورك
 
@@ -10,27 +12,38 @@
 ## في بداية كل جلسة
 
 `SessionStart` hook يحقن تلقائياً:
+
 - محتوى `memory/PROJECT_MAP.md`
 - التاريخ الحالي
 - حالة git
 
 **أنت لست مسؤولاً عن قراءتها يدوياً.**
 
+### أول جلسة في مشروع جديد
+
+لو `PROJECT_MAP.[PROJECT_IDENTITY]` فارغ، اقترح على المستخدم:
+
+```text
+هذا مشروع جديد. شغّل /bootstrap لقراءة الكود ومسح GitHub للمشاريع المشابهة وملء PROJECT_MAP تلقائياً.
+```
+
 ---
 
-## التحسين الجوهري في v3.1: Two-Gate Workflow
+## Three-Gate Workflow
 
-كل مهمة S/M/L تمر بـ **بوابتين** قبل قبولها:
+كل مهمة S/M/L تمر بـ **ثلاث بوابات**:
 
-```
+```text
 1. /plan → خطة أولية
-2. 🚪 BOUNDARY 1: plan-reviewer يراجع الخطة → APPROVED قبل التنفيذ
+2. 🚪 BOUNDARY 1: plan-reviewer يراجع الخطة → APPROVED
 3. تنفيذ عبر subagent متخصص
-4. 🚪 BOUNDARY 2: code-reviewer يتحقق من العقد → VERIFIED قبل القبول
-5. /session-end يحدّث PROJECT_MAP بالمقاييس الثلاثة
+4. 🚪 BOUNDARY 2: code-reviewer يفحص العقد (read-only) → VERIFIED
+5. 🚪 BOUNDARY 3: validator ينفّذ معيار النجاح فعلياً → PASS
+6. /session-end يسجّل الجلسة في PROJECT_MAP
 ```
 
-**لا تتجاوز بوابة.** المهام XS يمكن تخطيها (سؤال سريع لا يحتاج reviewer).
+**لا تتجاوز بوابة.** المهام XS تتخطاها كلها.
+**استثناء validator:** لو المعيار غير قابل للتنفيذ (وثائق فقط)، صرّح بذلك في التقرير لا تصمت.
 
 ---
 
@@ -39,71 +52,83 @@
 | الحجم | تعريف | البوابات |
 |------|--------|---------|
 | XS | سؤال أو تعديل بسيط | بدون — نفّذ مباشرة |
-| S | نطاق واحد | plan-reviewer (اختياري) + code-reviewer |
-| M | نطاقان+ | plan-reviewer (إلزامي) + code-reviewer |
-| L | متعدد ومترابط | plan-reviewer (إلزامي) + code-reviewer لكل مرحلة |
+| S | نطاق واحد | plan-reviewer (اختياري) + code-reviewer + validator |
+| M | نطاقان+ | plan-reviewer (إلزامي) + code-reviewer + validator |
+| L | متعدد ومترابط | plan-reviewer + code-reviewer لكل مرحلة + validator في النهاية |
 
 ---
 
-## الـ Subagents المتاحة
+## الـ Subagents المتاحة (7)
 
 ### Reviewers (بوابات الجودة)
-- **plan-reviewer** → يراجع الخطط قبل التنفيذ
-- **code-reviewer** → يتحقق من الكود بعد التنفيذ
 
-### Executors (المنفذون)
-- **staff-engineer** → بحث + تحليل
-- **senior-engineer** → كود إنتاجي عام
-- **windows-architect** → بنية Windows
-- **ps-lead** → PowerShell modules
+- **plan-reviewer** (Sonnet) → يراجع الخطط قبل التنفيذ
+- **code-reviewer** (Sonnet, read-only) → يفحص العقد بعد التنفيذ
+- **validator** (Haiku) → ينفّذ معيار النجاح فعلياً ويرفع transcript
+
+### Executors
+
+- **staff-engineer** (Sonnet) → بحث + تحليل + مسح GitHub
+- **senior-engineer** (Sonnet) → كود إنتاجي عام
+- **windows-architect** (Opus) → بنية Windows (Registry/GPO/Deployment)
+- **ps-lead** (Sonnet) → PowerShell modules + Pester
 
 ---
 
-## Skills (Progressive Disclosure)
+## Skills
 
-Skills تُحمَّل **حسب الحاجة** فقط، توفر توكن بشكل كبير:
+Skills ملفات `.md` في `.claude/skills/` تُقرأ على الطلب من الوكيل المناسب:
 
 - `windows-registry` → عند تعديل Registry
 - `pester-testing` → عند كتابة Pester tests
-
-**الفرق عن subagents:** Skill ملف صغير محمّل في السياق المحلي. Subagent له context window منفصل.
+- `github-research` → عند البحث عن مشاريع مشابهة على GitHub
 
 ---
 
 ## Slash Commands
 
-- `/plan [task]` — تحليل + اقتراح subagent + معيار نجاح
+- `/bootstrap` — أول جلسة: يقرأ المشروع كاملاً + يمسح GitHub + يملأ PROJECT_MAP
+- `/plan [task]` — تحليل + اقتراح subagent + معيار نجاح + plan-reviewer
+- `/scout [domain]` — مسح صريح لـ GitHub عن مشاريع مشابهة
 - `/review [target]` — مراجعة كود صارمة
-- `/session-end` — تحديث PROJECT_MAP + مقاييس ثلاثية
+- `/session-end` — تحديث PROJECT_MAP + Score/50
 
 ---
 
-## المقاييس الثلاثة (v3.1)
+## .claude/project.json (عقد المشروع)
 
-كل جلسة تنتج ثلاثة أرقام في `[SESSIONS_LOG]`:
+يُنشَأ بواسطة `/bootstrap`. يحوي:
 
-1. **Score /50** — جودة المخرج (كما في v3)
-2. **Plan-Adherence /10** — التزام الخطة الأصلية (جديد)
-3. **Cost-of-Pass** — التكلفة الفعلية بالتوكن/الدولار (جديد)
+```json
+{
+  "name": "...",
+  "language": "powershell|typescript|python|...",
+  "framework": "...",
+  "test_command": "Invoke-Pester | npm test | pytest",
+  "lint_command": "...",
+  "build_command": "..."
+}
+```
 
-والمؤشر الذكي: **$/point** في `[COST_LEDGER]` — يكشف أي جلسات أفضل قيمة.
+**validator يقرأه** بدل ما يخمن الأمر.
 
 ---
 
 ## الخطوط الحمراء — لا استثناء
 
 - لا تتجاوز plan-reviewer للمهام M/L
-- لا تقبل مخرج subagent بدون code-reviewer
+- لا تقبل مخرج subagent بدون code-reviewer + validator (إذا المعيار قابل للتنفيذ)
 - لا تمرر كوداً لم تقرأه
 - بعد 3 دورات تصحيح → استخدم subagent مختلف
 - لا تحذف ملفاً بدون إذن صريح
-- لا تتجاهل تحديث PROJECT_MAP — Stop hook سيذكّرك
+- لا تكتب رقماً في تقرير لا تستطيع إثباته
+- لا تتجاهل تحديث PROJECT_MAP — Stop hook يذكّرك
 
 ---
 
-## ملاحظات السياق
+## البيئة
 
-- المستخدم يفضل التواصل بالعربية
-- المشاريع الرئيسية: Polar OS v2.3، everything-claude-code repo
-- البيئة: Windows + PowerShell
-- اطلع على `memory/PROJECT_MAP.md` للسياق الكامل (يُحقَن تلقائياً)
+- Windows 10/11 + Claude Code for VS Code (Windows-only)
+- Hooks: Node 18+ (لا bash، لا WSL)
+- المستخدم يفضّل التواصل بالعربية
+- ملاحظات هذا المشروع: راجع `CLAUDE.local.md` (محمي عن الـ upgrades)

@@ -2,7 +2,7 @@
 name: plan-reviewer
 description: Plan and architecture review specialist. Use PROACTIVELY after /plan command and BEFORE any execution begins, to catch flawed plans before they cost execution tokens. Triggers on "review the plan", "check the architecture", "validate the approach", "before we implement". Returns a verdict (approved/rejected) with specific gaps and a refined plan.
 tools: Read, Grep, Glob, WebSearch
-model: opus
+model: sonnet
 ---
 
 # Plan Reviewer

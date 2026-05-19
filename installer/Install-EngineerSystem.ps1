@@ -98,7 +98,7 @@ function Test-Prerequisites {
     }
     Write-Info "المصدر موجود: $SourcePath"
 
-    # Source has required files
+    # Source has required files (v3.3: CLAUDE.local.md is optional but recommended as seed)
     $requiredFiles = @('CLAUDE.md', '.claude/settings.json', 'memory/PROJECT_MAP.md')
     foreach ($file in $requiredFiles) {
         $fullPath = Join-Path $SourcePath $file
@@ -107,6 +107,10 @@ function Test-Prerequisites {
         }
     }
     Write-Info "ملفات النظام مكتملة (CLAUDE.md, .claude/, memory/)"
+
+    if (-not (Test-Path (Join-Path $SourcePath 'CLAUDE.local.md'))) {
+        Write-Info "تنبيه: CLAUDE.local.md غير موجود في المصدر — لن يُنشَأ template في الهدف"
+    }
 
     # Target exists and is directory
     if (-not (Test-Path $TargetPath -PathType Container)) {
@@ -120,6 +124,23 @@ function Test-Prerequisites {
         Write-Warn "Claude Code CLI غير مثبّت. ثبّته بـ: npm install -g @anthropic-ai/claude-code"
     } else {
         Write-Info "Claude Code متاح: $($claudeCmd.Source)"
+    }
+
+    # Node.js — required for hooks in v3.2+
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $nodeCmd) {
+        Write-Warn "Node.js غير موجود في PATH. الـ hooks لن تعمل."
+        Write-Info "  ثبّت Node 18+: https://nodejs.org/  (يُثبَّت تلقائياً مع Claude Code عادةً)"
+    } else {
+        $nodeVer = & node --version 2>$null
+        if ($nodeVer -match '^v(\d+)') {
+            $major = [int]$Matches[1]
+            if ($major -lt 18) {
+                Write-Warn "Node.js $nodeVer أقدم من المطلوب (18+). الـ hooks قد تفشل."
+            } else {
+                Write-Info "Node.js $nodeVer ✓"
+            }
+        }
     }
 
     Write-OK "المتطلبات مكتملة"
@@ -233,18 +254,29 @@ function Install-Files {
 
     Write-Step "نسخ ملفات النظام..."
 
-    # 1. CLAUDE.md — protect if has customization (Upgrade mode)
+    # 1. CLAUDE.md — v3.3 is immutable orchestration: always refresh
+    #    (per-project context lives in CLAUDE.local.md, which is protected separately)
     $srcClaude = Join-Path $SourcePath 'CLAUDE.md'
     $dstClaude = Join-Path $TargetPath 'CLAUDE.md'
-    $protectClaude = ($Mode -eq 'Upgrade' -and $Conflicts.ClaudeMd)
-    Copy-WithProtection -SourceFile $srcClaude -TargetFile $dstClaude -ProtectExisting $protectClaude
+    Copy-WithProtection -SourceFile $srcClaude -TargetFile $dstClaude -ProtectExisting $false
 
-    # 2. .claude/ folder — always refresh in any mode (it's the system)
+    # 1b. CLAUDE.local.md — per-project notes: ALWAYS protect if exists, seed template if missing
+    $srcLocal = Join-Path $SourcePath 'CLAUDE.local.md'
+    $dstLocal = Join-Path $TargetPath 'CLAUDE.local.md'
+    if (Test-Path $srcLocal) {
+        Copy-WithProtection -SourceFile $srcLocal -TargetFile $dstLocal -ProtectExisting $true
+    }
+
+    # 2. .claude/ folder — always refresh, with two exceptions:
+    #    - project.json: protect if exists (user/bootstrap wrote real data)
+    #    - .session-edits.log*: never copy (runtime artifacts)
     $srcClaudeDir = Join-Path $SourcePath '.claude'
     Get-ChildItem -Path $srcClaudeDir -Recurse -File | ForEach-Object {
         $relativePath = $_.FullName.Substring($srcClaudeDir.Length).TrimStart('\')
+        if ($relativePath -like '.session-edits.log*') { return }
         $dstFile = Join-Path (Join-Path $TargetPath '.claude') $relativePath
-        Copy-WithProtection -SourceFile $_.FullName -TargetFile $dstFile -ProtectExisting $false
+        $protect = ($relativePath -eq 'project.json' -and (Test-Path $dstFile))
+        Copy-WithProtection -SourceFile $_.FullName -TargetFile $dstFile -ProtectExisting $protect
     }
 
     # 3. memory/PROJECT_MAP.md — ALWAYS protect if has data
@@ -255,13 +287,8 @@ function Install-Files {
 
 # ==================== Permissions ====================
 
-function Set-HookPermissions {
-    Write-Step "ضبط صلاحيات Hooks..."
-
-    if ($script:DryRun) {
-        Write-Info "(DryRun) سيتم تنفيذ chmod +x على .claude/hooks/*.sh"
-        return
-    }
+function Test-HooksInstalled {
+    Write-Step "التحقق من ملفات الـ Hooks (Node)..."
 
     $hooksDir = Join-Path $TargetPath '.claude\hooks'
     if (-not (Test-Path $hooksDir)) {
@@ -269,16 +296,23 @@ function Set-HookPermissions {
         return
     }
 
-    # Detect WSL/Git Bash for chmod (hooks invoke bash at runtime, so it must exist)
-    $bash = Get-Command bash -ErrorAction SilentlyContinue
-    if ($bash) {
-        $cmd = "cd '$($hooksDir -replace '\\', '/')' && chmod +x *.sh 2>/dev/null || true"
-        & bash -c $cmd 2>&1 | Out-Null
-        Write-Info "تم تطبيق chmod +x عبر bash"
+    $required = @('session-start.mjs', 'pre-bash.mjs', 'post-edit.mjs', 'stop-reminder.mjs')
+    $missing = @()
+    foreach ($h in $required) {
+        if (-not (Test-Path (Join-Path $hooksDir $h))) { $missing += $h }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Warn ("ملفات hooks مفقودة: " + ($missing -join ', '))
     } else {
-        Write-Warn "bash غير متاح — الـ hooks لن تعمل بدون Git Bash أو WSL."
-        Write-Info "  ثبّت Git for Windows: https://git-scm.com/download/win"
-        Write-Info "  ثم اضبط الصلاحيات يدوياً: chmod +x .claude/hooks/*.sh"
+        Write-Info "كل الـ hooks (.mjs) موجودة — Node executor، لا chmod"
+    }
+
+    # Detect leftover legacy .sh hooks from v3.1 in the TARGET project — warn the user
+    $legacy = Get-ChildItem -Path $hooksDir -Filter '*.sh' -ErrorAction SilentlyContinue
+    if ($legacy) {
+        Write-Warn "ملفات hooks قديمة (.sh) من v3.1 — احذفها:"
+        $legacy | ForEach-Object { Write-Info "  Remove-Item '$($_.FullName)'" }
     }
 }
 
@@ -297,12 +331,14 @@ function Update-Gitignore {
 
     $entriesToAdd = @(
         '# Principal Engineer System — internal tracking',
-        '.claude/.session-edits.log'
+        '.claude/.session-edits.log',
+        '.claude/.session-edits.log.old',
+        'CLAUDE.local.md'
     )
 
     if (Test-Path $gitignorePath) {
         $current = Get-Content $gitignorePath -Raw
-        if ($current -match [regex]::Escape('.claude/.session-edits.log')) {
+        if ($current -match [regex]::Escape('CLAUDE.local.md')) {
             Write-Info ".gitignore يحتوي الإدخالات المطلوبة"
             return
         }
@@ -330,12 +366,15 @@ function Suggest-Customization {
     Write-Host $projectName -ForegroundColor White
     Write-Host ""
     Write-Host "خطوة موصى بها بعد التثبيت:" -ForegroundColor Yellow
-    Write-Host "  1. افتح CLAUDE.md وعدّل قسم 'ملاحظات السياق' ليصف $projectName" -ForegroundColor Gray
-    Write-Host "  2. افتح Claude Code: " -NoNewline -ForegroundColor Gray
-    Write-Host "claude" -ForegroundColor Cyan
-    Write-Host "  3. اكتب " -NoNewline -ForegroundColor Gray
-    Write-Host "/agents" -NoNewline -ForegroundColor Cyan
-    Write-Host " للتأكد من تحميل الوكلاء" -ForegroundColor Gray
+    Write-Host "  1. افتح Claude Code (VS Code → Ctrl+Esc أو CLI: " -NoNewline -ForegroundColor Gray
+    Write-Host "claude" -NoNewline -ForegroundColor Cyan
+    Write-Host ")" -ForegroundColor Gray
+    Write-Host "  2. شغّل " -NoNewline -ForegroundColor Gray
+    Write-Host "/bootstrap" -NoNewline -ForegroundColor Cyan
+    Write-Host " — يقرأ المشروع + يمسح GitHub + يملأ PROJECT_MAP تلقائياً" -ForegroundColor Gray
+    Write-Host "  3. عدّل " -NoNewline -ForegroundColor Gray
+    Write-Host "CLAUDE.local.md" -NoNewline -ForegroundColor Cyan
+    Write-Host " (التفضيلات الخاصة بـ $projectName — محمي عن الـ upgrades)" -ForegroundColor Gray
     Write-Host "  4. ابدأ بـ " -NoNewline -ForegroundColor Gray
     Write-Host "/plan <مهمتك>" -ForegroundColor Cyan
 }
@@ -395,7 +434,7 @@ try {
     Install-Files -Conflicts $conflicts
     Write-Host ""
 
-    Set-HookPermissions
+    Test-HooksInstalled
     Write-Host ""
 
     Update-Gitignore

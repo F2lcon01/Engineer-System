@@ -1,49 +1,37 @@
 ---
-description: Update PROJECT_MAP.md with session work, cost tracking, and plan-adherence score
+description: Update PROJECT_MAP.md with session work — clean, focused, no fake metrics
 ---
 
-# Session End Protocol v3.1
+# Session End Protocol v3.3
 
 Execute this protocol to close the session cleanly. **Do not skip steps.**
 
 ## Step 1 — Read current state
 
-```
-Read memory/PROJECT_MAP.md fully
-Run `date` in bash for the current timestamp
-Identify what was accomplished this session
-```
+- Read `memory/PROJECT_MAP.md` fully
+- Run `date` to get the current timestamp
+- Identify what was actually accomplished this session (look at `.claude/.session-edits.log`)
 
-## Step 2 — Calculate the three metrics
+## Step 2 — Score the session honestly (one number)
 
-### A. Score /50 (5 dimensions, 10 points each)
+Single quality score **/50** across 5 dimensions:
+
 - Success criterion met
 - Security and stability
 - Code quality and organization
 - Completeness of deliverable
 - Adherence to constraints
 
-### B. Plan-Adherence /10 (NEW)
-How closely did execution match the original `/plan`?
-- **10**: Executed exactly as planned
-- **7-9**: Minor documented deviations
-- **4-6**: Significant deviations, partially justified
-- **0-3**: Plan abandoned mid-execution
-
-### C. Cost-of-Pass (NEW)
-- Subagent invocations count
-- Approximate token usage (Claude Code shows running total)
-- Wall-clock time (first to last message)
-- Dollar estimate using current rates
-
-If task was retried, **cost includes all retries**.
+That's it. No fake adherence-percentages, no token-guessing.
+If you want the real token cost, run the `/cost` slash command yourself.
 
 ## Step 3 — Update PROJECT_MAP.md
 
-### Standard sections (TECH_STACK, ARCHITECTURE, etc.)
-Update as before.
+### Standard sections (TECH_STACK, ARCHITECTURE, PENDING/DONE)
 
-### Append to [SESSIONS_LOG] with new metric fields
+Update with anything learned this session. Move completed items from PENDING to DONE.
+
+### Append to [SESSIONS_LOG]
 
 ```markdown
 ### Session [N]
@@ -53,25 +41,12 @@ Update as before.
 - **Outcome:**
   - Completed: [list]
   - Blocked: [list with reason]
-- **Metrics:**
-  - Score: [X/50]
-  - Plan-adherence: [X/10]
-  - Cost: [N calls, ~T tokens, ~$X]
-- **Files modified:** [list]
+- **Files modified:** [from .claude/.session-edits.log]
+- **Score:** [X/50]
 - **Lessons:** [what would you do differently?]
 ```
 
-### Update [COST_LEDGER] (create if absent)
-
-```markdown
-## [COST_LEDGER]
-
-| Session | Date | Score | Adherence | Tokens | Cost $ | $/point |
-|---------|------|-------|-----------|--------|--------|---------|
-| 14 | 2026-05-18 | 47 | 9 | 18,500 | $0.058 | $0.0012 |
-```
-
-**The $/point column reveals which sessions delivered best value.**
+### Update [KNOWN_ISSUES] if any surfaced
 
 ## Step 4 — Session summary for the user
 
@@ -81,15 +56,8 @@ Update as before.
 ### Accomplished
 - [Task: outcome]
 
-### Metrics
-- Score: [X/50] [⭐/✅/⚠️/❌]
-- Plan-adherence: [X/10]
-- Cost: ~$[X] for [N] calls
-
-### Value vs history
-- This session: $[X]/point
-- Your average: $[Y]/point  ← from COST_LEDGER
-- Verdict: [better than average / typical / expensive]
+### Score
+- [X/50] [⭐ / ✅ / ⚠️ / ❌]
 
 ### Remaining
 - [Pending items]
@@ -101,8 +69,8 @@ Update as before.
 ## Step 5 — Final verification
 
 Before ending:
-- ✅ PROJECT_MAP.md actually edited (Read to verify)
+
+- ✅ `PROJECT_MAP.md` actually edited (Read to verify)
 - ✅ Real date (not placeholder)
-- ✅ All three metrics honest (not optimistic)
-- ✅ COST_LEDGER updated
+- ✅ Score honest (not optimistic)
 - ✅ Pending items specific enough to resume

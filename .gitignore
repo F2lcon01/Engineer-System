@@ -4,6 +4,14 @@
 
 # Session tracking (internal to runtime)
 .claude/.session-edits.log
+.claude/.session-edits.log.old
+
+# Per-project local notes (v3.3) — never commit; protected from upgrades
+CLAUDE.local.md
+
+# Per-project metadata written by /bootstrap (commit OR ignore — your call)
+# Uncomment the next line to keep project.json out of git:
+# .claude/project.json
 
 # Local-only README design skill (Polar design system reference — not part of public repo)
 skilllsrREADME/

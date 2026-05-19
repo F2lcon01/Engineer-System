@@ -1,0 +1,12 @@
+{
+  "$schema": "./project.schema.json",
+  "_comment": "Auto-populated by /bootstrap. Edit only the fields you want to override. The validator subagent reads test_command/lint_command/build_command from here.",
+  "name": null,
+  "language": null,
+  "framework": null,
+  "test_command": null,
+  "lint_command": null,
+  "build_command": null,
+  "entry_points": [],
+  "bootstrapped_at": null
+}
