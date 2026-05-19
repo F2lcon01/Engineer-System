@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-plugin.json",
+  "name": "engineer-system",
+  "displayName": "Engineer System",
+  "version": "3.4.0",
+  "description": "Principal Engineer multi-agent workflow for Claude Code: 7 subagents, three-gate (plan/code/validator) review, Node hooks, /bootstrap with GitHub scout. Windows + PowerShell first.",
+  "author": {
+    "name": "Falcon01",
+    "email": "fox01vip@gmail.com",
+    "url": "https://github.com/F2lcon01"
+  },
+  "homepage": "https://github.com/F2lcon01/Engineer-System",
+  "repository": "https://github.com/F2lcon01/Engineer-System",
+  "license": "MIT",
+  "keywords": [
+    "windows",
+    "powershell",
+    "pester",
+    "multi-agent",
+    "code-review",
+    "principal-engineer",
+    "validator",
+    "github-scout"
+  ]
+}

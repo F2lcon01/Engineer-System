@@ -5,6 +5,31 @@ All notable changes to Engineer System.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0-alpha] - 2026-05-19
+
+### Added — Claude Code Plugin distribution (alpha)
+
+- **`.claude-plugin/plugin.json`** — official Claude Code plugin manifest (name, version, author, repo, license, keywords)
+- **`.claude-plugin/marketplace.json`** — single-plugin marketplace catalog so users can install via `/plugin marketplace add F2lcon01/Engineer-System` + `/plugin install engineer-system@engineer-system-marketplace`
+- **`installer/Build-Plugin.ps1`** — generates plugin layout (`agents/`, `commands/`, `skills/`, `scripts/`, `hooks/hooks.json`) from the canonical `.claude/` source. Supports `-Check` mode for CI (exit 1 on drift).
+- **Generated plugin layout at repo root:**
+  - `agents/` (7 files) — mirrors `.claude/agents/`
+  - `commands/` (6 files) — mirrors `.claude/commands/`
+  - `skills/` (6 files) — mirrors `.claude/skills/`
+  - `scripts/` (4 files) — mirrors `.claude/hooks/*.mjs` (excluding `__smoke-test.mjs`)
+  - `hooks/hooks.json` — invokes scripts via `${CLAUDE_PLUGIN_ROOT}/scripts/*.mjs`
+- **README install section** restructured: Plugin (Method 1) + Installer (Method 2), with a comparison table.
+
+### Why hybrid (plugin + installer)?
+
+Plugin system distributes shared components (agents, hooks, skills, commands) — but **`CLAUDE.md`, `CLAUDE.local.md`, `memory/PROJECT_MAP.md`, `.claude/project.json` are project-scoped**. A plugin cannot place files in the user's project. The installer remains the only way to seed those. The two methods complement each other.
+
+### Notes
+
+- Alpha status: plugin layout works but full `/plugin install` flow untested in a real session. The `Build-Plugin.ps1 -Check` regression test guards against `.claude/` ↔ plugin paths drift going forward.
+- Slash commands installed via plugin get a namespace prefix: `/engineer-system:plan` (vs `/plan` via installer). This is per Claude Code plugin spec — not a bug.
+- `.claude/` remains the canonical source of truth in this repo (used for self-dogfooding while developing). Run `Build-Plugin.ps1` after any change to `.claude/` to refresh plugin paths.
+
 ## [3.3.1] - 2026-05-19
 
 ### Added

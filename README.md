@@ -273,7 +273,20 @@ mindmap
 
 ## 📦 التثبيت — Installation (Windows فقط)
 
-### ▶️ PowerShell
+طريقتان متاحتان. يُوصى بالأولى للوكلاء/Hooks/Skills، والثانية لـ project-scoped files (`CLAUDE.md`, `PROJECT_MAP.md`).
+
+### ▶️ الطريقة 1 (v3.4-alpha): Claude Code Plugin
+
+```text
+# داخل Claude Code (VS Code):
+/plugin marketplace add F2lcon01/Engineer-System
+/plugin install engineer-system@engineer-system-marketplace
+```
+
+ينصّب الـ 7 وكلاء + 6 skills + 6 commands + 4 hooks تلقائياً وعالمياً (لكل مشاريعك).
+ملاحظة: الـ commands تصبح `/engineer-system:plan`, `/engineer-system:bootstrap`، إلخ (plugin namespace).
+
+### ▶️ الطريقة 2: PowerShell Installer (الـ canonical الحالي)
 
 ```powershell
 # 1. استنسخ المستودع لمكانه الافتراضي
@@ -288,6 +301,19 @@ Add-Content -Path $PROFILE -Value $func -Force
 cd C:\path\to\your-project
 install-eng
 ```
+
+يضع كل شيء داخل مشروعك في `.claude/` + ينشئ `CLAUDE.md` + `CLAUDE.local.md` + `memory/PROJECT_MAP.md`.
+
+### أيها أختار؟
+
+| | Plugin (v3.4-alpha) | Installer (canonical) |
+|--|--|--|
+| الـ agents/skills/commands/hooks | عالمياً (كل المشاريع) | محلياً (لكل مشروع) |
+| `CLAUDE.md` و `PROJECT_MAP.md` | ❌ (لا ينقلها plugin) | ✅ |
+| تحديث | `/plugin update` | `install-eng -Mode Upgrade` أو `/update` |
+| namespace في الـ commands | `/engineer-system:plan` | `/plan` |
+
+**نصيحتي:** ابدأ بـ Installer (canonical) لاختبار النظام. لو أعجبك، أضف plugin install بجانبه للحصول على عالمية الـ shared components.
 
 ### ▶️ أوضاع المثبّت
 

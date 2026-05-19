@@ -9,6 +9,9 @@
 # Per-project local notes (v3.3) — never commit; protected from upgrades
 CLAUDE.local.md
 
+# Release prep — staged locally before gh release create
+.release-notes-*.md
+
 # Per-project metadata written by /bootstrap (commit OR ignore — your call)
 # Uncomment the next line to keep project.json out of git:
 # .claude/project.json

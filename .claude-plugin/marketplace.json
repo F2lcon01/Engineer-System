@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-marketplace.json",
+  "name": "engineer-system-marketplace",
+  "displayName": "Engineer System Marketplace",
+  "description": "Single-plugin marketplace for Engineer System — install via /plugin marketplace add F2lcon01/Engineer-System",
+  "owner": {
+    "name": "Falcon01",
+    "url": "https://github.com/F2lcon01"
+  },
+  "plugins": [
+    {
+      "name": "engineer-system",
+      "source": "./",
+      "description": "Principal Engineer multi-agent workflow + three-gate review + GitHub scout"
+    }
+  ]
+}
